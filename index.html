@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wife's Workout Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-btn { border-color: #e11d48; background-color: #fff1f2; color: #e11d48; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 font-sans text-slate-900">
+    <div class="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border-8 border-white">
+        <div class="bg-gradient-to-br from-rose-500 to-rose-600 p-8 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 id="rotation-step" class="text-xs font-bold uppercase tracking-widest opacity-80">Day 1 of 5</h1>
+                    <div id="current-focus" class="text-3xl font-black leading-tight">Quads</div>
+                </div>
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">💪</div>
+            </div>
+        </div>
+
+        <div class="p-6 -mt-4 bg-white rounded-t-[2rem]">
+            <p class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-tighter">Tap to Select Exercise</p>
+            <div id="exercise-suggestions" class="flex flex-wrap gap-2 mb-8">
+                </div>
+
+            <div class="bg-slate-100 p-5 rounded-[2rem] mb-6 space-y-4">
+                <div class="relative">
+                    <input id="exercise" type="text" placeholder="Select an exercise above..." class="w-full bg-white p-4 rounded-2xl border-none shadow-sm font-bold text-rose-600 placeholder:font-normal placeholder:text-slate-400">
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                        <label class="block text-[10px] text-center font-bold text-slate-400 uppercase">Weight (lbs)</label>
+                        <input id="weight" type="number" class="w-full text-center text-xl font-bold bg-transparent outline-none">
+                    </div>
+                    <div class="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                        <label class="block text-[10px] text-center font-bold text-slate-400 uppercase">Reps</label>
+                        <input id="reps" type="number" class="w-full text-center text-xl font-bold bg-transparent outline-none">
+                    </div>
+                </div>
+                <button onclick="saveWorkout()" class="w-full bg-rose-500 text-white p-4 rounded-2xl font-black shadow-lg shadow-rose-200 active:scale-95 transition-all">LOG SET</button>
+            </div>
+
+            <button onclick="advanceRotation()" class="w-full mb-8 border-2 border-slate-200 text-slate-500 py-3 rounded-2xl font-bold text-sm hover:bg-slate-50">
+                Finish Workout & Move to Next Focus →
+            </button>
+
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-black text-slate-800 text-lg">Activity</h2>
+                <span class="text-[10px] bg-slate-200 px-2 py-1 rounded-md font-bold text-slate-500">RECENT</span>
+            </div>
+            
+            <div id="history" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const rotation = [
+            { name: "Quads", moves: ["Smith Machine Squats", "Leg Press", "Leg Extension", "Bulgarian Split Squats"] },
+            { name: "Hamstrings/Glutes", moves: ["Stiff Legged Deadlift", "Hip Thrusts", "Leg Curls", "Deadlift"] },
+            { name: "Upper Body", moves: ["Lat Pull Down", "Cable Row", "Lateral Raises", "Bicep Cable Curl", "Tricep Pushdown"] },
+            { name: "Quads", moves: ["Smith Machine Squats", "Leg Press", "Leg Extension", "Bulgarian Split Squats"] },
+            { name: "Hamstrings/Glutes", moves: ["Stiff Legged Deadlift", "Hip Thrusts", "Leg Curls", "Deadlift"] }
+        ];
+
+        let currentIdx = parseInt(localStorage.getItem('rotationIdx') || '0');
+
+        function updateUI() {
+            const focus = rotation[currentIdx];
+            document.getElementById('current-focus').innerText = focus.name;
+            document.getElementById('rotation-step').innerText = `Day ${currentIdx + 1} of 5`;
+            
+            const suggestContainer = document.getElementById('exercise-suggestions');
+            suggestContainer.innerHTML = focus.moves.map(move => `
+                <button onclick="fillExercise(this, '${move}')" class="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold border-2 border-transparent transition-all shadow-sm">
+                    ${move}
+                </button>
+            `).join('');
+            renderLogs();
+        }
+
+        function fillExercise(btn, name) {
+            // UI Toggle
+            document.querySelectorAll('#exercise-suggestions button').forEach(b => b.classList.remove('active-btn'));
+            btn.classList.add('active-btn');
+            
+            document.getElementById('exercise').value = name;
+        }
+
+        function advanceRotation() {
+            if(confirm("Ready to move to the next workout day in your rotation?")) {
+                currentIdx = (currentIdx + 1) % 5;
+                localStorage.setItem('rotationIdx', currentIdx);
+                updateUI();
+                document.getElementById('exercise').value = '';
+            }
+        }
+
+        function saveWorkout() {
+            const ex = document.getElementById('exercise').value;
+            const wt = document.getElementById('weight').value;
+            const rp = document.getElementById('reps').value;
+            if(!ex || !wt || !rp) return alert("Enter weight and reps!");
+
+            const log = {
+                category: rotation[currentIdx].name,
+                text: `${ex}: ${wt}lbs x ${rp}`,
+                date: new Date().toLocaleDateString(undefined, {month: 'short', day: 'numeric'})
+            };
+
+            let logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+            logs.unshift(log);
+            localStorage.setItem('workoutLogs', JSON.stringify(logs));
+            renderLogs();
+            document.getElementById('weight').value = '';
+            document.getElementById('reps').value = '';
+        }
+
+        function renderLogs() {
+            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+            const container = document.getElementById('history');
+            container.innerHTML = logs.map(log => `
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div>
+                        <p class="text-xs font-bold text-rose-400 uppercase">${log.category}</p>
+                        <p class="text-slate-800 font-bold">${log.text}</p>
+                    </div>
+                    <div class="text-[10px] font-black text-slate-400">${log.date}</div>
+                </div>
+            `).join('');
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
