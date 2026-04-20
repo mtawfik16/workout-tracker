@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wife's Workout Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Workout Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .active-btn { border-color: #e11d48; background-color: #fff1f2; color: #e11d48; }
-        /* Hide scrollbar for cleaner look */
+        .active-btn { border-color: #e11d48 !important; background-color: #fff1f2 !important; color: #e11d48 !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen p-4 font-sans text-slate-900">
@@ -19,24 +19,24 @@
             <div class="flex justify-between items-start">
                 <div>
                     <h1 id="rotation-step" class="text-xs font-bold uppercase tracking-widest opacity-80">Day 1 of 5</h1>
-                    <div id="current-focus" class="text-3xl font-black leading-tight">Quads</div>
+                    <div id="current-focus" class="text-3xl font-black leading-tight italic">Quads</div>
                 </div>
-                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm text-xl">⚡</div>
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm text-xl text-white">✨</div>
             </div>
         </div>
 
         <div class="p-6 -mt-4 bg-white rounded-t-[2rem]">
-            <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">Select Exercise</p>
+            <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">Tap to select exercise</p>
             <div id="exercise-suggestions" class="flex flex-wrap gap-2 mb-8 justify-center">
                 </div>
 
-            <div class="bg-slate-100 p-5 rounded-[2rem] mb-6 space-y-4">
-                <input id="exercise" type="text" placeholder="Select above..." class="w-full bg-white p-4 rounded-2xl border-none shadow-sm font-bold text-rose-600 placeholder:font-normal placeholder:text-slate-400">
+            <div class="bg-slate-100 p-5 rounded-[2rem] mb-6 space-y-4 shadow-inner">
+                <input id="exercise" type="text" placeholder="Select above..." class="w-full bg-white p-4 rounded-2xl border-none shadow-sm font-bold text-rose-600 placeholder:font-normal placeholder:text-slate-400 focus:ring-2 focus:ring-rose-300 outline-none">
                 
                 <div class="flex gap-3">
                     <div class="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 text-center">
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Weight (kg)</label>
-                        <input id="weight" type="number" step="0.5" class="w-full text-center text-xl font-bold bg-transparent outline-none" placeholder="0">
+                        <input id="weight" type="number" step="0.1" class="w-full text-center text-xl font-bold bg-transparent outline-none" placeholder="0">
                     </div>
                     <div class="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 text-center">
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Reps</label>
@@ -51,11 +51,11 @@
             </button>
 
             <div class="flex justify-between items-center mb-4">
-                <h2 class="font-black text-slate-800 text-lg">Recent History</h2>
-                <button onclick="clearAll()" class="text-[9px] font-bold text-slate-400 hover:text-red-400 uppercase">Clear All</button>
+                <h2 class="font-black text-slate-800 text-lg">History</h2>
+                <button onclick="clearAll()" class="text-[9px] font-bold text-slate-400 hover:text-red-400 uppercase">Reset All</button>
             </div>
             
-            <div id="history" class="space-y-3 max-h-64 overflow-y-auto pr-1 no-scrollbar">
+            <div id="history" class="space-y-3 max-h-64 overflow-y-auto pr-1 no-scrollbar pb-4">
                 </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
         const rotation = [
             { name: "Quads", moves: ["Smith Machine Squats", "Leg Press", "Leg Extension", "Bulgarian Split Squats"] },
             { name: "Hamstrings/Glutes", moves: ["Stiff Legged Deadlift", "Hip Thrusts", "Leg Curls", "Deadlift"] },
-            { name: "Upper Body", moves: ["Lat Pull Down", "Cable Row", "Lateral Raises", "Bicep Cable Curl", "Tricep Pushdown"] },
+            { name: "Upper Body", moves: ["Lat Pull Down", "Cable Row", "Lateral Shoulder Raises", "Bicep Cable Curl", "Tricep Cable Pushdown"] },
             { name: "Quads", moves: ["Smith Machine Squats", "Leg Press", "Leg Extension", "Bulgarian Split Squats"] },
             { name: "Hamstrings/Glutes", moves: ["Stiff Legged Deadlift", "Hip Thrusts", "Leg Curls", "Deadlift"] }
         ];
@@ -78,7 +78,7 @@
             
             const suggestContainer = document.getElementById('exercise-suggestions');
             suggestContainer.innerHTML = focus.moves.map(move => `
-                <button onclick="fillExercise(this, '${move}')" class="bg-slate-50 text-slate-600 px-3 py-2 rounded-xl text-xs font-bold border-2 border-transparent transition-all shadow-sm">
+                <button onclick="fillExercise(this, '${move}')" class="bg-slate-50 text-slate-600 px-3 py-2 rounded-xl text-xs font-bold border-2 border-slate-100 transition-all shadow-sm">
                     ${move}
                 </button>
             `).join('');
@@ -92,7 +92,7 @@
         }
 
         function advanceRotation() {
-            if(confirm("Great job! Move to the next focus day?")) {
+            if(confirm("Workout complete! Move to the next focus?")) {
                 currentIdx = (currentIdx + 1) % 5;
                 localStorage.setItem('rotationIdx', currentIdx);
                 updateUI();
@@ -104,7 +104,7 @@
             const ex = document.getElementById('exercise').value;
             const wt = document.getElementById('weight').value;
             const rp = document.getElementById('reps').value;
-            if(!ex || !wt || !rp) return alert("Please enter kg and reps!");
+            if(!ex || !wt || !rp) return alert("Please fill in everything!");
 
             const log = {
                 id: Date.now(),
@@ -129,7 +129,7 @@
         }
 
         function clearAll() {
-            if(confirm("Clear all history?")) {
+            if(confirm("This will delete all saved workouts. Proceed?")) {
                 localStorage.setItem('workoutLogs', '[]');
                 renderLogs();
             }
@@ -138,10 +138,14 @@
         function renderLogs() {
             const logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
             const container = document.getElementById('history');
+            if (logs.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-300 text-xs italic py-4">No logs yet...</p>`;
+                return;
+            }
             container.innerHTML = logs.map(log => `
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group">
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 group animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div>
-                        <p class="text-[10px] font-black text-rose-400 uppercase tracking-tighter">${log.category} • ${log.date}</p>
+                        <p class="text-[9px] font-black text-rose-400 uppercase tracking-tighter">${log.category} • ${log.date}</p>
                         <p class="text-slate-800 font-bold">${log.text}</p>
                     </div>
                     <button onclick="deleteLog(${log.id})" class="text-slate-300 hover:text-red-400 p-2 transition-colors font-bold text-lg">✕</button>
